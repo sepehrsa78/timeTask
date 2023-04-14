@@ -40,7 +40,7 @@ Screen('Preference', 'DefaultTextYPositionIsBaseline', 1);
 %% Psychtoolbox Initialization
 
 monitorWidth    = 311;                                                      % in milimeters
-monitorDistance = 200;                                                     % in milimeters
+monitorDistance = 270;                                                      % in milimeters
 
 screenNumber    = 0;
 resolution      = Screen('Resolution', screenNumber);
@@ -69,6 +69,7 @@ penWidthPixels        = 5;
 Screen('TextSize', window, 24);
 Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 SetMouse(0, 0);
+% HideCursor();
 
 topPriorityLevel    = MaxPriority(window);
 [xCenter, yCenter]  = RectCenter(windowRect);
@@ -99,9 +100,9 @@ for iBlock = 1:nBlock
         siShort(iBlock, iTrial)   = shortRange(1) + (shortRange(2) - shortRange(1)) * rand(1, 1);
         siInter(iBlock, iTrial)   = interRange(1) + (interRange(2) - interRange(1)) * rand(1, 1);
         siLong(iBlock, iTrial)    = longRange(1) + (longRange(2) - longRange(1)) * rand(1, 1);
-        diShort(iBlock, iTrial)   = 4;
-        diInter(iBlock, iTrial)   = 6;
-        diLong(iBlock, iTrial)    = 8;
+        shRange(iBlock, iTrial)   = 4;
+        midRange(iBlock, iTrial)  = 6;
+        longRange(iBlock, iTrial) = 8;
         delay(iBlock, iTrial)     = (500 + randi([1, 500])) / 1000;
     end
 end
@@ -117,19 +118,18 @@ durations.ITI               = 1;
 
 diams.fix                   = .5;
 diams.set                   = 1.5;
-diams.target                = .5;
-diams.margin                = 1;
-diams.lineWidth             = 5;
+diams.target                = 1.5;
+diams.margin                = 2;
 
-dists.targetPoint           = 10;
-dists.shortRange            = diShort;
-dists.mideRange             = diInter;
-dists.longRange             = diLong;
+dists.targetPoint           = 7.5;
+dists.shortRange            = shRange;
+dists.mideRange             = midRange;
+dists.longRange             = longRange;
 dists.angParams             = [monitorDistance, monitorWidth / screenWidth];
 
-lines.left                  = [0 xCenter; 0 yCenter];
-lines.middle                = [xCenter xCenter; 0 yCenter];
-lines.right                 = [xCenter * 2 xCenter; 0 yCenter];
+lines.left                  = [0 yCenter; 0 0];
+lines.middle                = [xCenter 0; xCenter yCenter];
+lines.right                 = [xCenter * 2 0; xCenter yCenter];
 
 colors.right                = [0 1 0];
 colors.circles              = [1 1 1];
@@ -194,11 +194,11 @@ for iBlock = 1:nBlock
         end
         switch block(iBlock).trialSet(iTrial).distIntervalType
             case 'short'
-                block(iBlock).trialSet(iTrial).distInterval = diShort(iBlock, iTrial);
+                block(iBlock).trialSet(iTrial).distInterval = shRange(iBlock, iTrial);
             case 'inter'
-                block(iBlock).trialSet(iTrial).distInterval = diInter(iBlock, iTrial);
+                block(iBlock).trialSet(iTrial).distInterval = midRange(iBlock, iTrial);
             case 'long'
-                block(iBlock).trialSet(iTrial).distInterval = diLong(iBlock, iTrial);
+                block(iBlock).trialSet(iTrial).distInterval = longRange(iBlock, iTrial);
         end
 
     end
@@ -217,11 +217,11 @@ for iBlock = 1:nBlock
     params.isAllowed = true;
     bsTime(iBlock) = GetSecs() - timer;
 
-    while iTrial <= numTrls 
+    while iTrial <= numTrls / nBlock
+
 
         if params.isFirst
-            Prompt_Start = sprintf("%s", blockTypes(iBlock));
-            DrawFormattedText(window, char(Prompt_Start),...
+            DrawFormattedText(window, 'Start',...
                 'center', 'center', BlackIndex(screenNumber) / 2);
             Screen('Flip', window);
             KbStrokeWait;
@@ -239,16 +239,15 @@ for iBlock = 1:nBlock
             break
         end
 
-        Priority(2);
-        block = expDirs(frameSpecs, colors, diams, durations, dists, window, xCenter, yCenter, block, iBlock, iTrial, timer);
-        Priority(0);
+        [block] = expDirs(frameSpecs, colors, diams, durations, dists, window, xCenter, yCenter, block, iBlock, iTrial, timer);
+
 
     end
 
     params.isBlockEnd = true;
 
     if params.isBlockEnd && iBlock < nBlock
-        Prompt_Start = sprintf("%s", blockTypes(iBlock + 1  ));
+        Prompt_Start = sprintf("Start With %s Hand", handTwo);
         DrawFormattedText(window, char(Prompt_Start),...
             'center', 'center', BlackIndex(screenNumber) / 2);
         Screen('Flip', window);
@@ -267,7 +266,7 @@ for iBlock = 1:nBlock
         sca;
     end
 end
-Priority(0);
+
 %% Save Data
 
 % if answer{6, 1} == '1'
