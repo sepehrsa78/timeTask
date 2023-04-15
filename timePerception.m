@@ -68,15 +68,15 @@ textcolor             = BlackIndex(window);
 penWidthPixels        = 5;
 Screen('TextSize', window, 24);
 Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
-SetMouse(0, 0);
 
 topPriorityLevel    = MaxPriority(window);
 [xCenter, yCenter]  = RectCenter(windowRect);
+SetMouse(xCenter, yCenter);
 %% Task Parameters and Constants
 
 timeCondsNum = 3;
 distCondsNum = 3;
-trlReps      = 10;
+trlReps      = 1;
 
 if answer{4, 1} == '1'
     nBlock   = 1;
@@ -118,8 +118,11 @@ durations.ITI               = 1;
 diams.fix                   = .5;
 diams.set                   = 1.5;
 diams.target                = .5;
-diams.margin                = 1;
 diams.lineWidth             = 5;
+
+rads.timeMargin              = 1;
+rads.spaceMargin             = 1;
+rads.fixMargin               = 2;
 
 dists.targetPoint           = 10;
 dists.shortRange            = diShort;
@@ -135,6 +138,7 @@ colors.right                = [0 1 0];
 colors.circles              = [1 1 1];
 colors.fix                  = [1 1 1];
 colors.line                 = [.1 .1 .1];
+colors.margin               = [1 0 0];
 
 % Keyboard Information
 
@@ -177,6 +181,7 @@ for iBlock = 1:nBlock
         'lineOn', [],...
         'setOn', [],...
         'tarOn', [],...
+        'saccadeOn', [],...
         'RT', [],...
         'acc', []...
         );
@@ -234,13 +239,15 @@ for iBlock = 1:nBlock
             iTrial = iTrial + 1;
         end
 
-        if iTrial > numTrls / nBlock
+        if iTrial > numTrls
             params.isAllowed  = false;
             break
         end
 
-        Priority(2);
-        block = expDirs(frameSpecs, colors, diams, durations, dists, window, xCenter, yCenter, block, iBlock, iTrial, timer);
+        Priority(topPriorityLevel);
+        block = expDirs(...
+            frameSpecs, colors, rads, diams, durations, dists,...
+            window, xCenter, yCenter, block, iBlock, iTrial, timer);
         Priority(0);
 
     end
@@ -267,7 +274,13 @@ for iBlock = 1:nBlock
         sca;
     end
 end
-Priority(0);
+
+sData.sInfo                 = answer;
+sData.Blocks.Durations      = durations;
+sData.Blocks.blockType      = blockTypes;
+sData.Blocks.bsTime         = bsTime;
+sData.Blocks.ebTime         = ebTime;
+sData.Blocks.Trials         = block;
 %% Save Data
 
 % if answer{6, 1} == '1'

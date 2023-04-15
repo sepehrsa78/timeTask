@@ -99,15 +99,15 @@ switch block(iBlock).trialSet(iTrial).blockType
         
         isWithinLine = false;
         in           = false;
-        while all(isWithinLine & in) | all(~isWithinLine & ~in) | in
+        while all(isWithinLine & in) | all(~isWithinLine & ~in)
             [keyIsDown, ~, keyCode] = KbCheck();
             if keyIsDown && keyCode(KbName('ESCAPE'))
                 sca;
                 break
             end
-            [xSacc, ySacc] = GetMouse();
+            [xSacc, ySacc] = GetMouse()
             isWithinLine = marginalDistance(yCenter, [xSacc, ySacc], line, rads.spaceMargin, dists);
-            in = inRect(xSacc, ySacc, fixMarginRect);
+            in = inRect(xSacc, ySacc, fixMarginRect)
             if ~in && isWithinLine  
                 block(iBlock).trialSet(iTrial).saccadeOn = GetSecs();
                 block(iBlock).trialSet(iTrial).RT = block(iBlock).trialSet(iTrial).saccadeOn - vbl;

@@ -7,7 +7,6 @@ if distance < marginPix
     isHit = true;
 else
     isHit = false;
-
 end
 
 
