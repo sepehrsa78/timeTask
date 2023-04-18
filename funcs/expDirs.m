@@ -99,18 +99,19 @@ switch block(iBlock).trialSet(iTrial).blockType
         
         isWithinLine = false;
         in           = false;
-        while all(isWithinLine & in) | all(~isWithinLine & ~in) | in
+        while in || all(~isWithinLine & ~in) || all(isWithinLine & in) 
             [keyIsDown, ~, keyCode] = KbCheck();
             if keyIsDown && keyCode(KbName('ESCAPE'))
                 sca;
                 break
             end
             [xSacc, ySacc] = GetMouse();
-            isWithinLine = marginalDistance(yCenter, [xSacc, ySacc], line, rads.spaceMargin, dists);
+            [isWithinLine, dist2cent] = marginalDistance([xCenter, yCenter], [xSacc, ySacc], line, rads.spaceMargin, dists);
             in = inRect(xSacc, ySacc, fixMarginRect);
             if ~in && isWithinLine  
                 block(iBlock).trialSet(iTrial).saccadeOn = GetSecs();
                 block(iBlock).trialSet(iTrial).RT = block(iBlock).trialSet(iTrial).saccadeOn - vbl;
+                block(iBlock).trialSet(iTrial).prodDist = pix2ang(dist2cent, dists.angParams(1), dists.angParams(2));
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
             end
         end

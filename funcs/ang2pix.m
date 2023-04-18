@@ -4,7 +4,7 @@ if nargin < 3
     pxlSize = 53.5 / 1920;
 end
 
-sz = d * 2 * tan(pi * ang / (2 * 180));
-pxl = round(sz / pxlSize);
+pxl = round(d * 2 * tan(pi * ang / (2 * 180)) / pxlSize);
 
 end
+
