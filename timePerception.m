@@ -284,6 +284,12 @@ end
 
 sData.sInfo                 = answer;
 sData.Blocks.Durations      = durations;
+sData.Blocks.Rads           = rads;
+sData.Blocks.Dists          = dists;
+sData.Blocks.Diams          = diams;
+sData.Blocks.Rads           = rads;
+sData.Blocks.Lines          = lines;
+sData.Blocks.Colors         = colors;
 sData.Blocks.blockType      = blockTypes;
 %% Save Data
 
