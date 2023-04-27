@@ -47,7 +47,7 @@ for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
     end
 end
 
-for numFrames = 1:round(0.010 / frameSpecs.ifi)
+for numFrames = 1:round(1)
     Screen('DrawLines', window, line, diams.lineWidth, colors.line);
     Screen('FillOval', window, colors.fix, fixRect);
     Screen('FillOval', window, colors.circles, setRect);
@@ -69,7 +69,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, line, diams.lineWidth, colors.line);
         Screen('FillOval', window, colors.fix, fixRect);
         Screen('FillOval', window, colors.circles, targetRect);
-        Screen('FrameOval', window, [1 0 0], timeMarginRect);
+%         Screen('FrameOval', window, [1 0 0], timeMarginRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
 
@@ -93,8 +93,8 @@ switch block(iBlock).trialSet(iTrial).blockType
     case 'space'
 
         Screen('DrawLines', window, line, diams.lineWidth, colors.line);
-        Screen('FillOval', window, colors.fix, fixRect);
-        Screen('FrameOval', window, [1 0 0], fixMarginRect);
+        Screen('FillOval', window, colors.go, fixRect);
+%         Screen('FrameOval', window, [1 0 0], fixMarginRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
         
         isWithinLine = false;

@@ -25,7 +25,7 @@ params.isBlockEnd   = false;
 params.isSave       = false;
 %% Subject Information
 
-prompt      = {'Subject Name:', 'Age:', 'Gender:', 'Demo:', 'Eye Tracker:', 'Save Data:', 'Hand:'};
+prompt      = {'Subject Name:', 'Age:', 'Gender:', 'Demo:', 'Eye Tracker:', 'Save Data:', 'Hand:', 'Time First:'};
 dlgtitle    = 'Subject Information';
 dims        = [1 35];
 answer      = inputdlg(prompt, dlgtitle, dims);
@@ -39,8 +39,8 @@ Screen('Preference', 'TextAlphaBlending', 0);
 Screen('Preference', 'DefaultTextYPositionIsBaseline', 1);
 %% Psychtoolbox Initialization
 
-monitorWidth    = 311;                                                     % in milimeters
-monitorDistance = 200;                                                     % in milimeters
+monitorWidth    = 300;                                                     % in milimeters
+monitorDistance = 300;                                                     % in milimeters
 
 screenNumber    = 0;
 resolution      = Screen('Resolution', screenNumber);
@@ -53,7 +53,7 @@ nScreenBuffers  = 2;
 [window, windowRect] = PsychImaging(...
     'OpenWindow', ...
     screenNumber, ...`
-    [127 127 127] / 255, ...
+    [128 128 128] / 255, ...
     floor([0, 0, screenWidth, screenHeight] / 1), ...
     pixelDepth, ...
     nScreenBuffers, ...
@@ -64,6 +64,7 @@ nScreenBuffers  = 2;
 
 frameSpecs.ifi        = Screen('GetFlipInterval', window);
 frameSpecs.waitframes = 1;
+frameSpecs.frameRate  = 60;
 textcolor             = BlackIndex(window);
 penWidthPixels        = 5;
 Screen('TextSize', window, 24);
@@ -76,7 +77,7 @@ SetMouse(xCenter, yCenter);
 
 timeCondsNum = 3;
 distCondsNum = 3;
-trlReps      = 1;
+trlReps      = 5;
 
 if answer{4, 1} == '1'
     nBlock   = 1;
@@ -96,9 +97,9 @@ tpd = expDist(1, 2000, delayRange(1), delayRange(2));
 
 for iBlock = 1:nBlock
     for iTrial = 1:numTrls
-        siShort(iBlock, iTrial)   = shortRange(1) + (shortRange(2) - shortRange(1)) * rand(1, 1);
-        siInter(iBlock, iTrial)   = interRange(1) + (interRange(2) - interRange(1)) * rand(1, 1);
-        siLong(iBlock, iTrial)    = longRange(1) + (longRange(2) - longRange(1)) * rand(1, 1);
+        siShort(iBlock, iTrial)   = .6;
+        siInter(iBlock, iTrial)   = .9;
+        siLong(iBlock, iTrial)    = 1.5;
         diShort(iBlock, iTrial)   = 4;
         diInter(iBlock, iTrial)   = 6;
         diLong(iBlock, iTrial)    = 8;
@@ -120,9 +121,9 @@ diams.set                   = 1.5;
 diams.target                = .5;
 diams.lineWidth             = 5;
 
-rads.timeMargin              = 1;
-rads.spaceMargin             = 1;
-rads.fixMargin               = 2;
+rads.timeMargin              = sqrt(2);
+rads.spaceMargin             = sqrt(2);
+rads.fixMargin               = 3;
 
 dists.targetPoint           = 10;
 dists.shortRange            = diShort;
@@ -134,7 +135,7 @@ lines.left                  = [0 xCenter; 0 yCenter];
 lines.middle                = [xCenter xCenter; 0 yCenter];
 lines.right                 = [xCenter * 2 xCenter; 0 yCenter];
 
-colors.right                = [0 1 0];
+colors.go                   = [0 1 0];
 colors.circles              = [1 1 1];
 colors.fix                  = [1 1 1];
 colors.line                 = [.1 .1 .1];
@@ -148,8 +149,10 @@ keyBoard.leftKey   = KbName('LeftArrow');
 keyBoard.rightKey  = KbName('RightArrow');
 %% Creating the Condition Map
 
-blockTypes = repmat(["time" "space"], [1 timeCondsNum]);
-blockTypes = blockTypes(randperm(length(blockTypes)));
+blockTypes = [repmat("time", [1 timeCondsNum]) repmat("space", [1 timeCondsNum])];
+if answer{8, 1} ~= "1"
+    blockTypes = flip(blockTypes);
+end
 interTypes = ["short", "inter", "long"];
 lineOri    = ["left", "center", "right"];
 
