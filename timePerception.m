@@ -225,6 +225,7 @@ for iBlock = 1:nBlock
     iTrial = 0;
     params.isAllowed = true;
     bsTime(iBlock) = GetSecs() - timer;
+    sData.Blocks(iBlock).bsTime = bsTime(iBlock);
 
     while iTrial <= numTrls 
 
@@ -256,7 +257,8 @@ for iBlock = 1:nBlock
 
     end
 
-    params.isBlockEnd = true;
+    sData.Blocks(iBlock).Trials = block(iBlock).trialSet;
+    params.isBlockEnd = true;    
 
     if params.isBlockEnd && iBlock < nBlock
         Prompt_Start = sprintf("%s", blockTypes(iBlock + 1  ));
@@ -267,6 +269,7 @@ for iBlock = 1:nBlock
         Screen('Flip', window);
         params.isBlockEnd = false;
         ebTime(iBlock) = GetSecs() - timer;
+        sData.Blocks(iBlock).ebTime = ebTime(iBlock);
     end
     if iBlock == nBlock
         ebTime(iBlock) = GetSecs() - timer;
@@ -282,22 +285,19 @@ end
 sData.sInfo                 = answer;
 sData.Blocks.Durations      = durations;
 sData.Blocks.blockType      = blockTypes;
-sData.Blocks.bsTime         = bsTime;
-sData.Blocks.ebTime         = ebTime;
-sData.Blocks.Trials         = block;
 %% Save Data
 
-% if answer{6, 1} == '1'
-%     params.isSave = true;
-% end
-% 
-% if answer{6, 1} == '1' && params.isSave
-%     if ~exist(fullfile(path, 'results', answer{1, 1}), "dir")
-%         mkdir(fullfile(path, 'results', answer{1, 1}))
-%     end
-%     if answer{4, 1} == '1'
-%         save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_demo_data.mat']))
-%     else
-%         save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_data.mat']), 'sData')
-%     end
-% end
+if answer{6, 1} == '1'
+    params.isSave = true;
+end
+
+if answer{6, 1} == '1' && params.isSave
+    if ~exist(fullfile(path, 'results', answer{1, 1}), "dir")
+        mkdir(fullfile(path, 'results', answer{1, 1}))
+    end
+    if answer{4, 1} == '1'
+        save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_demo_data.mat']))
+    else
+        save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_data.mat']), 'sData')
+    end
+end
