@@ -6,7 +6,10 @@ distance      = abs(numerator / denominator);
 marginPix     = ang2pix(radius, dists.angParams(1), dists.angParams(2));
 distance2cent = sqrt((point(1) - pointCent(1)) ^ 2 + (point(2) - pointCent(2)) ^ 2);
 
-if point(2) <= pointCent(2) && distance < marginPix
+dP = point(1) - pointCent(1);
+dL = line(1, 1) - pointCent(1);
+
+if distance < marginPix && dL * dP > 0
     isWithinLine = true;
 else
     isWithinLine = false;
