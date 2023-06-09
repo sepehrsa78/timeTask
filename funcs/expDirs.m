@@ -1,5 +1,4 @@
-function [block] = expDirs(frameSpecs, colors, ...
-    rads, diams, durations, dists, window, xCenter,...
+function [block] = expDirs(frameSpecs, window, xCenter,...
     yCenter, block, iBlock, iTrial, timer)
 
 lineOS = block(iBlock).trialSet(iTrial).lineSpecs;
@@ -56,7 +55,7 @@ for numFrames = 1:round(durations.fixation / frameSpecs.ifi)
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).fixOn)
         block(iBlock).trialSet(iTrial).fixOn = vbl - timer;
-%         Eyelink('Message', 'Fix On');
+        Eyelink('Message', 'Fix On');
     end
 end
 
@@ -68,7 +67,7 @@ for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
     if isempty(block(iBlock).trialSet(iTrial).lineOn)
         block(iBlock).trialSet(iTrial).lineOn = vbl - timer;
         block(iBlock).trialSet(iTrial).fixOff = vbl - timer;
-%         Eyelink('Message', 'Line On');
+        Eyelink('Message', 'Line On');
     end
 end
 
@@ -105,7 +104,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         %         Screen('FrameOval', window, [1 0 0], timeMarginRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
-%         Eyelink('Message', 'Target On');
+        Eyelink('Message', 'Target On');
         
         flags.isHit    = false;
         flags.eyeFixed = false;
@@ -113,9 +112,9 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.break    = false;
         
         [block, flags, tFixBreak, tSampl] = timeSaccade(...
-            block, iBlock, iTrial, window, flags, frameSpecs, durations,...
-    abortRect, fixMarginRect, timeMarginRect, pointerMarginRadius, colors,...
-    vbl, timer, diams, lineOS, fixLines);
+            block, iBlock, iTrial, window, flags, frameSpecs,...
+    abortRect, fixMarginRect, timeMarginRect, pointerMarginRadius,...
+    vbl, timer, lineOS, fixLines);
         
         if flags.isHit && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
@@ -128,12 +127,12 @@ switch block(iBlock).trialSet(iTrial).blockType
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
-%                     Eyelink('Message', 'Success Feedback On');
+                    Eyelink('Message', 'Success Feedback On');
                 end
             end
             vbl = Screen('Flip', window);
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
-%             Eyelink('Message', 'Success Feedback Off');
+            Eyelink('Message', 'Success Feedback Off');
         else
             Screen('FillOval', window, colors.abort, abortRect);
             for numFrames = 1:round(durations.feedB / frameSpecs.ifi)
@@ -141,12 +140,12 @@ switch block(iBlock).trialSet(iTrial).blockType
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
-%                     Eyelink('Message', 'Abort Feedback On');
+                    Eyelink('Message', 'Abort Feedback On');
                 end
             end
             vbl = Screen('Flip', window);
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
-%             Eyelink('Message', 'Abort Feedback Off');
+            Eyelink('Message', 'Abort Feedback Off');
         end
     case 'space'
         
@@ -165,16 +164,16 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.break    = false;
         
         
-        [block, flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent] = spaceSaccade(...
-            block, iBlock, iTrial, window, flags, frameSpecs, durations, rads, dists,...
+        [block, flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(...
+            block, iBlock, iTrial, window, flags, frameSpecs,...
             abortRect, fixMarginRect, spaceMarginRadius, pointerMarginRadius,...
-            xCenter, yCenter, lineOS, colors, vbl, timer, diams, fixLines);
+            xCenter, yCenter, lineOS, colors, vbl, timer, fixLines);
         
         if flags.isOnLine && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
             block(iBlock).trialSet(iTrial).saccadeInRect = tSampl - timer;
             block(iBlock).trialSet(iTrial).RT            = tFixBreak - greenOn;
-            block(iBlock).trialSet(iTrial).prodDist      = [dist2cent, xSacc, ySacc];
+            block(iBlock).trialSet(iTrial).prodDist      = [dist2cent, dist2line, xSacc, ySacc];
             
             spaceFeedRect = [...
                 xSacc - spaceFeedRadius, ySacc - spaceFeedRadius,...

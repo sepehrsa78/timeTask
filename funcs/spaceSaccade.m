@@ -1,5 +1,5 @@
-function [block, flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent] = spaceSaccade(block, iBlock, iTrial, window, flags, frameSpecs, durations, rads, dists,...
-    abortRect, fixMarginRect, spaceMarginRadius, pointerMarginRadius, xCenter, yCenter, lineOS, colors, vbl, timer, diams, fixLines)
+function [block, flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(block, iBlock, iTrial, window, flags, frameSpecs,...
+    abortRect, fixMarginRect, spaceMarginRadius, pointerMarginRadius, xCenter, yCenter, lineOS, vbl, timer, fixLines)
 
 while ~flags.break
     while flags.inFix
@@ -23,7 +23,7 @@ while ~flags.break
         %         Screen('FrameOval', window, [1 0 0], checkRect);
         %         Screen('FrameOval', window, [1 0 0], fixMarginRect);
         %         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-        if ~IsInRect(xFix, yFix, fixMarginRect)
+        if ~IsInRect(xFix, yFix, fixMarginRect) && IsInRect(xFix, yFix, params.windowRect)
             tFixBreak   = GetSecs();
             Eyelink('Message', 'Saccade On');
             flags.inFix = false;
@@ -38,7 +38,7 @@ while ~flags.break
     tSampl = GetSecs();
     xSacc  = tmp.gx(1);
     ySacc  = tmp.gy(1);
-    [flags.isOnLine, dist2cent] = marginalDistance([xCenter, yCenter], [xSacc, ySacc], lineOS, rads.spaceMargin, dists);
+    [flags.isOnLine, dist2cent, dist2line] = marginalDistance([xCenter, yCenter], [xSacc, ySacc], lineOS);
     if flags.isOnLine
         Eyelink('Message', 'Saccade In Rect');
         spaceMarginRect = [...

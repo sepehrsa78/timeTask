@@ -1,29 +1,72 @@
 %% Refreshing the Workspace
 sca
 close all
-clear             
+clearvars -except run answer nBlock block sData
 clear global
 clc
     
 addpath('funcs')
 path = pwd;
+rng(sum(100 * clock));
 %% Declare Golabal Variables
 
 bsTime  = [];
 beTime  = [];
 
+global durations
+global diams
+global rads
+global dists
+global lines
+global colors
+global keyBoard
 global params
 
 params.isFirst      = true;
 params.isAllowed    = false;
 params.isBlockEnd   = false;
 params.isSave       = false;
-%% Subject Information     
+params.windowRect   = [];
+%% Subject Information 
 
-prompt      = {'Subject Name:', 'Age:', 'Gender:', 'Demo:', 'Subject Number:', 'Save Data:', 'Hand:', 'Time First:', 'Light Left:'};
-dlgtitle    = 'Subject Information';
-dims        = [1 35];
-answer      = inputdlg(prompt, dlgtitle, dims);
+if ~exist('run', 'var')
+    prompt         = 'Is this the first session?';
+    sessionInfo    = 'Subject Information';
+    isFirstSession = questdlg(prompt, sessionInfo, 'Yes', 'No', '');
+    if strcmpi(isFirstSession, 'Yes')
+        isFirstSession = true;
+    else
+        isFirstSession = false;
+    end
+end
+
+if exist('isFirstSession', 'var') && isFirstSession
+    prompt      = {'Subject Name:', 'Subject Number:', 'Age:', 'Gender:', 'Hand:', 'Demo:', 'Time First:', 'Light Left:'};
+    dlgtitle    = 'Subject Information';
+    dims        = [1 35];
+    answer      = inputdlg(prompt, dlgtitle, dims);
+    run         = 1;
+elseif exist('isFirstSession', 'var') && ~isFirstSession && ~exist('run', 'var')
+    dataDir     = ls('./results/');
+    dataDir     = dataDir(3:end, :);
+    idx         = listdlg('ListString', dataDir);
+    subjectName = dataDir(idx, :);
+    load(fullfile('results', deblank(subjectName), strcat(subjectName, '_conditionMap.mat')))
+    load(fullfile('results', deblank(subjectName), strcat(subjectName, '_data.mat')))
+
+    prompt      = {'Block Number:'};
+    dlgtitle    = 'Run Information';
+    dims        = [1 35];
+    bAns        = inputdlg(prompt, dlgtitle, dims);
+    run         = str2double(bAns{1});
+elseif exist('run', 'var') && run < nBlock
+    prompt      = {'Block Number:'};
+    dlgtitle    = 'Run Information';
+    dims        = [1 35];
+    defInput    = run + 1;
+    bAns        = inputdlg(prompt, dlgtitle, dims, {num2str(defInput)});
+    run         = str2double(bAns{1});
+end
 %% Initialize Eyetracker
 
 % debug = 1;
@@ -38,8 +81,8 @@ if ~exist(fullfile(path, 'results', answer{1, 1}), 'dir')
     mkdir(fullfile(path, 'results', answer{1, 1}))
 end
 
-save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_eyeD.edf', answer{5, 1})));
-edfFile = fullfile(path, 'results', answer{1, 1}, sprintf('%s_eyeD', answer{5, 1}));
+save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_B%d_eyeD.edf', answer{2, 1}, run)));
+edfFile = fullfile(path, 'results', answer{1, 1}, sprintf('%sـB%d_eyeD', answer{2, 1}, run));
 
 eyeInit(edfFile);
 %% Psychtoolbox Setup
@@ -100,10 +143,13 @@ distCondsNum = 3;
 blockPmodal  = 4;
 trlReps      = 6;
 
-if answer{4, 1} == '1'
-    nBlock   = 1;
-    numTrls  = 20;
-    realTrls = timeCondsNum * distCondsNum * trlReps;
+if answer{6, 1} == '1'
+    nBlock       = 2;
+    timeCondsNum = 3;
+    distCondsNum = 3;
+    blockPmodal  = 2;
+    trlReps      = 1;
+    numTrls      = timeCondsNum * distCondsNum * trlReps;
 else
     nBlock   = 8;
     numTrls  = timeCondsNum * distCondsNum * trlReps;
@@ -133,10 +179,10 @@ durations.delay             = delay;
 durations.siShort           = siShort;
 durations.siInter           = siInter;
 durations.siLong            = siLong;
-durations.ITI               = 1;
-durations.tFixed            = .084;
+durations.ITI               = 1 - .1091;
+durations.tFixed            = .1;
 durations.feedB             = 0.033;
-durations.saccAcc           = .2;
+durations.saccAcc           = .1;
 
 diams.fix                   = .5;
 diams.set                   = 1.5;
@@ -159,11 +205,11 @@ lines.downRight             = [xCenter * 2 xCenter; yCenter * 2 yCenter];
 lines.upLeft                = [0 xCenter; 0 yCenter];
 lines.downLeft              = [0 xCenter; yCenter * 2 yCenter];
 
-colors.go                   = [0 1 0];
-colors.abort                = [1 1 0];
-colors.circles              = [1 1 1];
-colors.fix                  = [1 1 1];
-colors.line                 = [.1 .1 .1];
+colors.go                   = [0 .75 0];
+colors.abort                = [.75 .75 0];
+colors.circles              = [.75 .75 .75];
+colors.fix                  = [.75 .75 .75];
+colors.line                 = [.2 .2 .2];
 colors.margin               = [1 0 0];
 
 % Keyboard Information
@@ -176,10 +222,10 @@ keyBoard.rightKey  = KbName('RightArrow');
 
 blockTypes = [repmat({'time'}, [1 blockPmodal]) repmat({'space'}, [1 blockPmodal])];
 flashLocs  = repmat([repmat({'left'}, [1 blockPmodal / 2]) repmat({'right'}, [1 blockPmodal / 2])], [1 length(unique(blockTypes))]);
-if answer{8, 1} ~= '1'
+if answer{7, 1} ~= '1'
     blockTypes = flip(blockTypes);
 end
-if answer{9, 1} ~= '1'
+if answer{8, 1} ~= '1'
     flashLocs  = flip(flashLocs);
 end
 interTypes = {'short', 'inter', 'long'};
@@ -195,74 +241,71 @@ lineLocs(find(strcmp(blockTypes, 'space') & strcmp(flashLocs, 'left'), blockPmod
 
 timeSpaceIntervals = cellstr(repmat(permn(interTypes, 2), [trlReps 1]));
 
-for iBlock = 1:nBlock
-    switch lineLocs{iBlock}
-        case 'upright'
-            lineSpecs = lines.upRight;
-        case 'downright'
-            lineSpecs = lines.downRight;
-        case 'upleft'
-            lineSpecs = lines.upLeft;
-        case 'downleft'
-            lineSpecs = lines.downLeft;
-    end
-    block(iBlock).trialSet = struct(...
-        'blockType', repmat(blockTypes(iBlock), [numTrls, 1]),...
-        'targetLineLoc', repmat(lineLocs(iBlock), [numTrls, 1]),...
-        'lineSpecs', repmat({lineSpecs}, [numTrls, 1]),...
-        'flashLoc', repmat(flashLocs(iBlock), [numTrls, 1]),...
-        'timeIntervalType', timeSpaceIntervals(:, 1),...
-        'distIntervalType', timeSpaceIntervals(:, 2),...
-        'delay', num2cell(durations.delay(iBlock, :))',...
-        'timeInterval', [],...
-        'distInterval', [],...
-        'targetInterval', [],...
-        'fixOn', [],...
-        'fixOff', [],...
-        'lineOn', [],...
-        'lineOff', [],...
-        'setOn', [],...
-        'setOff', [],...
-        'tarOn', [],...
-        'saccadeOn', [],...
-        'saccadeInRect', [],...
-        'feedBackOn', [],...
-        'feedBackOff', [],...
-        'prodDist', [],...
-        'RT', []...
-        );
-end
-for iBlock = 1:nBlock
-
-    for iTrial = 1:numTrls
-        switch block(iBlock).trialSet(iTrial).timeIntervalType
-            case 'short'
-                block(iBlock).trialSet(iTrial).timeInterval = siShort(iBlock, iTrial);
-            case 'inter'
-                block(iBlock).trialSet(iTrial).timeInterval = siInter(iBlock, iTrial);
-            case 'long'
-                block(iBlock).trialSet(iTrial).timeInterval = siLong(iBlock, iTrial);
+if run == 1
+    for iBlock = 1:nBlock
+        switch lineLocs{iBlock}
+            case 'upright'
+                lineSpecs = lines.upRight;
+            case 'downright'
+                lineSpecs = lines.downRight;
+            case 'upleft'
+                lineSpecs = lines.upLeft;
+            case 'downleft'
+                lineSpecs = lines.downLeft;
         end
-        switch block(iBlock).trialSet(iTrial).distIntervalType
-            case 'short'
-                block(iBlock).trialSet(iTrial).distInterval   = diShort(iBlock, iTrial);
-                block(iBlock).trialSet(iTrial).targetInterval = diShort(iBlock, iTrial);
-            case 'inter'
-                block(iBlock).trialSet(iTrial).distInterval   = diInter(iBlock, iTrial);
-                block(iBlock).trialSet(iTrial).targetInterval = diInter(iBlock, iTrial);
-            case 'long'
-                block(iBlock).trialSet(iTrial).distInterval   = diLong(iBlock, iTrial);
-                block(iBlock).trialSet(iTrial).targetInterval = diLong(iBlock, iTrial);
-        end
-
+        block(iBlock).trialSet = struct(...
+            'blockType', repmat(blockTypes(iBlock), [numTrls, 1]),...
+            'targetLineLoc', repmat(lineLocs(iBlock), [numTrls, 1]),...
+            'lineSpecs', repmat({lineSpecs}, [numTrls, 1]),...
+            'flashLoc', repmat(flashLocs(iBlock), [numTrls, 1]),...
+            'timeIntervalType', timeSpaceIntervals(:, 1),...
+            'distIntervalType', timeSpaceIntervals(:, 2),...
+            'delay', num2cell(durations.delay(iBlock, :))',...
+            'timeInterval', [],...
+            'distInterval', [],...
+            'targetInterval', [],...
+            'fixOn', [],...
+            'fixOff', [],...
+            'lineOn', [],...
+            'lineOff', [],...
+            'setOn', [],...
+            'setOff', [],...
+            'tarOn', [],...
+            'saccadeOn', [],...
+            'saccadeInRect', [],...
+            'feedBackOn', [],...
+            'feedBackOff', [],...
+            'prodDist', [],...
+            'RT', []...
+            );
     end
-
-    block(iBlock).trialSet = block(iBlock).trialSet(randperm(numTrls));
-
+    for iBlock = 1:nBlock
+        for iTrial = 1:numTrls
+            switch block(iBlock).trialSet(iTrial).timeIntervalType
+                case 'short'
+                    block(iBlock).trialSet(iTrial).timeInterval = siShort(iBlock, iTrial);
+                case 'inter'
+                    block(iBlock).trialSet(iTrial).timeInterval = siInter(iBlock, iTrial);
+                case 'long'
+                    block(iBlock).trialSet(iTrial).timeInterval = siLong(iBlock, iTrial);
+            end
+            switch block(iBlock).trialSet(iTrial).distIntervalType
+                case 'short'
+                    block(iBlock).trialSet(iTrial).distInterval   = diShort(iBlock, iTrial);
+                    block(iBlock).trialSet(iTrial).targetInterval = diShort(iBlock, iTrial);
+                case 'inter'
+                    block(iBlock).trialSet(iTrial).distInterval   = diInter(iBlock, iTrial);
+                    block(iBlock).trialSet(iTrial).targetInterval = diInter(iBlock, iTrial);
+                case 'long'
+                    block(iBlock).trialSet(iTrial).distInterval   = diLong(iBlock, iTrial);
+                    block(iBlock).trialSet(iTrial).targetInterval = diLong(iBlock, iTrial);
+            end
+        end
+        block(iBlock).trialSet = block(iBlock).trialSet(randperm(numTrls));
+    end
+    save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_conditionMap.edf', answer{1, 1})));
 end
 %% Task Body
-
-rng(sum(100 * clock));
 
 Eyelink('SetOfflineMode');
 Eyelink('StartRecording');
@@ -270,107 +313,82 @@ WaitSecs(.010)
 
 timer = GetSecs();
 
-for iBlock = 1:nBlock
+iTrial            = 0;
+params.isAllowed  = true;
+while iTrial <= numTrls
 
-    iTrial = 0;
-    params.isAllowed = true;
-    bsTime(iBlock) = GetSecs() - timer;
-    sData.Blocks(iBlock).bsTime = bsTime(iBlock);
-
-    while iTrial <= numTrls 
-
-        if params.isFirst
-            Prompt_Start = sprintf('%s', string(blockTypes(iBlock)));
-            DrawFormattedText(window, char(Prompt_Start),...
-                'center', 'center', BlackIndex(screenNumber) / 2);
-            Screen('Flip', window);
-            KbStrokeWait;
-            Screen('Flip', window);
-
-            params.isFirst = false;
-        end
-
-        if params.isAllowed
-            iTrial = iTrial + 1;
-        end
-
-        if iTrial > numTrls
-            params.isAllowed  = false;
-            break
-        end
-        
-        Eyelink('Message', 'TRIALID %d', iTrial);
-        Eyelink('Command', 'record_status_message "TRIAL %d/%d"', iTrial, numTrls);
-
-        Priority(topPriorityLevel);
-        [block] = expDirs(...
-            frameSpecs, colors, rads, diams, durations, dists,...
-            window, xCenter, yCenter, block, iBlock, iTrial, timer);
-
-        Eyelink('Message', 'BLANK_SCREEN');
-        Eyelink('Message', '!V CLEAR %d %d %d', 80, 80, 80);
-        Eyelink('Message', '!V TRIAL_VAR iteration %d', iTrial); % Trial iteration
-        Eyelink('Message', 'TRIAL_RESULT 0');
-
-        WaitSecs(durations.ITI);
-        Priority(0); 
-
-    end
-
-    sData.Blocks(iBlock).Trials = block(iBlock).trialSet;
-    params.isBlockEnd = true;    
-
-    if params.isBlockEnd && iBlock < nBlock
-        ebTime(iBlock) = GetSecs() - timer;
-        sData.Blocks(iBlock).ebTime = ebTime(iBlock);
-        Prompt_Start = sprintf('%s', string(blockTypes(iBlock + 1)));
+    if params.isFirst
+        Prompt_Start = sprintf('%s', string(blockTypes(run)));
         DrawFormattedText(window, char(Prompt_Start),...
             'center', 'center', BlackIndex(screenNumber) / 2);
         Screen('Flip', window);
         KbStrokeWait;
         Screen('Flip', window);
-        params.isBlockEnd = false;
-    end
-    if iBlock == nBlock
-        ebTime(iBlock) = GetSecs() - timer;
-        sData.Blocks(iBlock).ebTime = ebTime(iBlock);
-        Prompt_Start = 'Task Finished';
-        DrawFormattedText(window, Prompt_Start,...
-            'center', 'center', BlackIndex(screenNumber) / 2);
-        Screen('Flip', window);
 
-        WaitSecs(0.100)
-        Eyelink('StopRecording')
+        params.isFirst = false;
+        bsTime(run)              = GetSecs() - timer;
+        sData.Blocks(run).bsTime = bsTime(run);
     end
+
+    if params.isAllowed
+        iTrial = iTrial + 1;
+    end
+
+    if iTrial > numTrls
+        params.isAllowed  = false;
+        break
+    end
+
+    Eyelink('Message', 'TRIALID %d', iTrial);
+    Eyelink('Command', 'record_status_message "TRIAL %d/%d"', iTrial, numTrls);
+
+    Priority(topPriorityLevel);
+    [block] = expDirs(frameSpecs, window, xCenter, yCenter, block, run, iTrial, timer);
+
+    Eyelink('Message', 'BLANK_SCREEN');
+    Eyelink('Message', '!V CLEAR %d %d %d', 80, 80, 80);
+    Eyelink('Message', '!V TRIAL_VAR iteration %d', iTrial); % Trial iteration
+    Eyelink('Message', 'TRIAL_RESULT 0');
+
+    WaitSecs(durations.ITI);
+    Priority(0);
+
 end
+
+ebTime(run)              = GetSecs() - timer;
+sData.Blocks(run).ebTime = ebTime(run);
+sData.Blocks(run).Trials = block(run).trialSet;
+Prompt_Start = 'Task Finished';
+DrawFormattedText(window, Prompt_Start, 'center', 'center', BlackIndex(screenNumber) / 2);
+Screen('Flip', window);
+
+WaitSecs(0.100)
+Eyelink('StopRecording')
 %% Data Storage
 
-sData.sInfo          = answer;
-sData.Durations      = durations;
-sData.Rads           = rads;
-sData.Dists          = dists;
-sData.Diams          = diams;
-sData.Rads           = rads;
-sData.Lines          = lines;
-sData.Colors         = colors;
-sData.blockType      = blockTypes;
+if run == 1
+    sData.sInfo          = answer;
+    sData.Durations      = durations;
+    sData.Rads           = rads;
+    sData.Dists          = dists;
+    sData.Diams          = diams;
+    sData.Rads           = rads;
+    sData.Lines          = lines;
+    sData.Colors         = colors;
+    sData.blockType      = blockTypes;
+end
 %% Save Data
    
+if ~exist(fullfile(path, 'results', answer{1, 1}), 'dir')
+    mkdir(fullfile(path, 'results', answer{1, 1}))
+end
 if answer{6, 1} == '1'
-    params.isSave = true;
+    save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_demo_data.mat']))
+else
+    blockData = Blocks(run).Trials;
+    save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, sprintf('_B%d_data.mat', run)]), 'blockData')
+    save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_data.mat']), 'sData')
 end
-
-if answer{6, 1} == '1' && params.isSave
-    if ~exist(fullfile(path, 'results', answer{1, 1}), 'dir')
-        mkdir(fullfile(path, 'results', answer{1, 1}))
-    end
-    if answer{4, 1} == '1'
-        save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_demo_data.mat']))
-    else
-        save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_data.mat']), 'sData')
-    end
-end
-
 %% Close Eyetracker
 
 % CLOSE EDF FILE. TRANSFER EDF COPY TO DISPLAY PC. CLOSE EYELINK CONNECTION. FINISH UP

@@ -1,5 +1,5 @@
-function [block, flags, tFixBreak, tSampl] = timeSaccade(block, iBlock, iTrial, window, flags, frameSpecs, durations,...
-    abortRect, fixMarginRect, timeMarginRect, pointerMarginRadius, colors, vbl, timer, diams, lineOS, fixLines)
+function [block, flags, tFixBreak, tSampl] = timeSaccade(block, iBlock, iTrial, window, flags, frameSpecs,...
+    abortRect, fixMarginRect, timeMarginRect, pointerMarginRadius, vbl, timer, lineOS, fixLines)
 
 while ~flags.break
     while flags.inFix
@@ -14,7 +14,7 @@ while ~flags.break
         %         xFix = tmp.gx(1);
         %         yFix = tmp.gy(1);
         [xFix, yFix] = GetMouse();
-        if ~IsInRect(xFix, yFix, fixMarginRect)
+        if ~IsInRect(xFix, yFix, fixMarginRect) && IsInRect(xFix, yFix, params.windowRect)
             tFixBreak   = GetSecs();
             %             Eyelink('Message', 'Saccade On');
             flags.inFix = false;
