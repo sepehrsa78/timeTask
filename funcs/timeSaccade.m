@@ -1,4 +1,4 @@
-function [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects)
+function [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects, vbl)
 
 while ~flags.break
     while flags.inFix
@@ -13,7 +13,6 @@ while ~flags.break
         end
     end
 
-    vbl = Screen('Flip', window);
     for numFrames = 1:round(taskSettings.durations.saccAcc / frameSpecs.ifi)
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);

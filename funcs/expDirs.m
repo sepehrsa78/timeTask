@@ -103,7 +103,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.inFix    = true;
         flags.break    = false;
 
-        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects);
+        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects, vbl);
 
         if flags.isHit && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
@@ -152,7 +152,7 @@ switch block(iBlock).trialSet(iTrial).blockType
 
 
         [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = ...
-            spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius);
+            spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius, vbl);
 
         if flags.isOnLine && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;

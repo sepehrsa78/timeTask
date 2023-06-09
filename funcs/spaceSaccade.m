@@ -1,5 +1,5 @@
 function [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = ...
-    spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius)
+    spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius, vbl)
 
 while ~flags.break
     while flags.inFix
@@ -14,7 +14,6 @@ while ~flags.break
         end
     end
 
-    vbl = Screen('Flip', window);
     for numFrames = 1:round(taskSettings.durations.saccAcc / frameSpecs.ifi) - 1
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
