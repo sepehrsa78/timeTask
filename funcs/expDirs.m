@@ -51,7 +51,7 @@ for numFrames = 1:round(taskSettings.durations.fixation / frameSpecs.ifi)
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).fixOn)
-        %         Eyelink('Message', 'Fix On');
+        Eyelink('Message', 'Fix On');
         block(iBlock).trialSet(iTrial).fixOn = vbl - timer;
     end
 end
@@ -61,7 +61,7 @@ for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).lineOn)
-        %         Eyelink('Message', 'Line On');
+        Eyelink('Message', 'Line On');
         block(iBlock).trialSet(iTrial).lineOn = vbl - timer;
         block(iBlock).trialSet(iTrial).fixOff = vbl - timer;
     end
@@ -73,7 +73,7 @@ for numFrames = 1:round(1)
     Screen('FillOval', window, taskSettings.colors.circles, rects.setRect);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).setOn)
-        %         Eyelink('Message', 'Set On');
+        Eyelink('Message', 'Set On');
         block(iBlock).trialSet(iTrial).lineOff = vbl - timer;
         block(iBlock).trialSet(iTrial).setOn   = vbl - timer;
     end
@@ -95,7 +95,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
         Screen('FillOval', window, taskSettings.colors.circles, rects.targetRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-        %         Eyelink('Message', 'Target On');
+        Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
 
         flags.isHit    = false;
@@ -103,7 +103,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.inFix    = true;
         flags.break    = false;
 
-        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects, vbl);
+        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects);
 
         if flags.isHit && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
@@ -115,12 +115,12 @@ switch block(iBlock).trialSet(iTrial).blockType
                 Screen('FillOval', window, taskSettings.colors.go, rects.targetRect);
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
-                    %                     Eyelink('Message', 'Success Feedback On');
+                    Eyelink('Message', 'Success Feedback On');
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
                 end
             end
             vbl = Screen('Flip', window);
-            %             Eyelink('Message', 'Success Feedback Off');
+            Eyelink('Message', 'Success Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
         else
             Screen('FillOval', window, taskSettings.colors.abort, rects.abortRect);
@@ -129,11 +129,11 @@ switch block(iBlock).trialSet(iTrial).blockType
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
-                    %                     Eyelink('Message', 'Abort Feedback On');
+                    Eyelink('Message', 'Abort Feedback On');
                 end
             end
             vbl = Screen('Flip', window);
-            %             Eyelink('Message', 'Abort Feedback Off');
+            Eyelink('Message', 'Abort Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
         end
     case 'space'
@@ -141,7 +141,7 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-        %         Eyelink('Message', 'Target On');
+        Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
         greenOn = vbl;
 
@@ -151,8 +151,8 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.break    = false;
 
 
-        [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(...
-            taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius, vbl);
+        [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = ...
+            spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius);
 
         if flags.isOnLine && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
@@ -170,12 +170,12 @@ switch block(iBlock).trialSet(iTrial).blockType
                 Screen('FillOval', window, taskSettings.colors.go, rects.spaceFeedRect);
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
-                    %                     Eyelink('Message', 'Success Feedback On');
+                    Eyelink('Message', 'Success Feedback On');
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
                 end
             end
             vbl = Screen('Flip', window);
-            %             Eyelink('Message', 'Success Feedback Off');
+            Eyelink('Message', 'Success Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
         else
             Screen('FillOval', window, taskSettings.colors.abort, rects.abortRect);
@@ -183,12 +183,12 @@ switch block(iBlock).trialSet(iTrial).blockType
                 Screen('FillOval', window, taskSettings.colors.abort, rects.abortRect);
                 vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 if numFrames == 1
-                    %                     Eyelink('Message', 'Abort Feedback On');
+                    Eyelink('Message', 'Abort Feedback On');
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
                 end
             end
             vbl = Screen('Flip', window);
-            %             Eyelink('Message', 'Abort Feedback Off');
+            Eyelink('Message', 'Abort Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
         end
 end
