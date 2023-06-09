@@ -1,4 +1,5 @@
-function [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects, vbl)
+function [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects,...
+    pointerMarginRadius, vbl, timer)
 
 while ~flags.break
     while flags.inFix
@@ -18,6 +19,7 @@ while ~flags.break
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
         Screen('FillOval', window, taskSettings.colors.circles, rects.targetRect);
+        %         Screen('FrameOval', window, [1 0 0], rects.checkRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     end
 
@@ -25,6 +27,15 @@ while ~flags.break
     [xSacc, ySacc] = GetMouse();
     %             Eyelink('Message', 'Saccade In Rect');
     tSampl = GetSecs();
+    %         xSacc  = tmp.gx(1);
+    %         ySacc  = tmp.gy(1);
+    %         pointMarginRect = [...
+    %             xSacc - pointerMarginRadius, ySacc - pointerMarginRadius,...
+    %             xSacc + pointerMarginRadius, ySacc + pointerMarginRadius];
+    %         Screen('DrawLines', window, lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
+    %         Screen('DrawLines', window, fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
+    %         Screen('FillOval', window, taskSettings.colors.margin, pointMarginRect);
+    %         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     flags.isHit  = IsInRect(xSacc, ySacc, rects.timeMarginRect);
     if ~flags.isHit
         flags.break = true;
@@ -37,6 +48,13 @@ while ~flags.break
             %             xTmp   = tmpS.gx(1);
             %             yTmp   = tmpS.gy(1);
             [xTmp, yTmp] = GetMouse();
+            %             pointMarginRect = [...
+            %                 xTmp - pointerMarginRadius, yTmp - pointerMarginRadius,...
+            %                 xTmp + pointerMarginRadius, yTmp + pointerMarginRadius];
+            %             Screen('DrawLines', window, lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
+            %             Screen('DrawLines', window, fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
+            %             Screen('FillOval', window, taskSettings.colors.margin, pointMarginRect);
+            %             vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
             if IsInRect(xTmp, yTmp, rects.timeMarginRect)
                 flags.eyeFixed = true;
                 flags.break    = true;

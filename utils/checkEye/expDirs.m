@@ -13,6 +13,7 @@ fixMarginRadius     = ang2pix(taskSettings.rads.fixMargin, taskSettings.dists.an
 timeMarginRadius    = ang2pix(taskSettings.rads.timeMargin, taskSettings.dists.angParams(1), taskSettings.dists.angParams(2));
 spaceMarginRadius   = ang2pix(taskSettings.rads.spaceMargin, taskSettings.dists.angParams(1), taskSettings.dists.angParams(2));
 spaceFeedRadius     = ang2pix(taskSettings.rads.spaceFeed, taskSettings.dists.angParams(1), taskSettings.dists.angParams(2));
+pointerMarginRadius = ang2pix(.1, taskSettings.dists.angParams(1), taskSettings.dists.angParams(2));
 
 if strcmp(block(iBlock).trialSet(iTrial).flashLoc, 'right')
     coef = -1;
@@ -48,6 +49,7 @@ rects.timeMarginRect  = [...
 
 vbl = Screen('Flip', window);
 for numFrames = 1:round(taskSettings.durations.fixation / frameSpecs.ifi)
+    %     Screen('FrameOval', window, [1 0 0], rects.checkRect);
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).fixOn)
@@ -59,6 +61,7 @@ end
 for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
     Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
+    %     Screen('FrameOval', window, [1 0 0], rects.checkRect);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).lineOn)
         %         Eyelink('Message', 'Line On');
@@ -71,6 +74,7 @@ for numFrames = 1:round(1)
     Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
     Screen('FillOval', window, taskSettings.colors.circles, rects.setRect);
+    %     Screen('FrameOval', window, [1 0 0], rects.checkRect);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).setOn)
         %         Eyelink('Message', 'Set On');
@@ -82,6 +86,7 @@ end
 for numFrames = 1:round(block(iBlock).trialSet(iTrial).timeInterval / frameSpecs.ifi)
     Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
+    %     Screen('FrameOval', window, [1 0 0], rects.checkRect);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
     if isempty(block(iBlock).trialSet(iTrial).setOff)
         block(iBlock).trialSet(iTrial).setOff = vbl - timer;
@@ -94,6 +99,8 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
         Screen('FillOval', window, taskSettings.colors.circles, rects.targetRect);
+        %         Screen('FrameOval', window, [1 0 0], rects.checkRect);
+        %         Screen('FrameOval', window, [1 0 0], rects.timeMarginRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
         %         Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
@@ -103,7 +110,8 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.inFix    = true;
         flags.break    = false;
 
-        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects, vbl);
+        [flags, tFixBreak, tSampl] = timeSaccade(taskSettings, window, flags, frameSpecs, rects,...
+            pointerMarginRadius, vbl, timer);
 
         if flags.isHit && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;
@@ -140,6 +148,8 @@ switch block(iBlock).trialSet(iTrial).blockType
 
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
+        %         Screen('FrameOval', window, [1 0 0], rects.checkRect);
+        %         Screen('FrameOval', window, [1 0 0], rects.fixMarginRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
         %         Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
@@ -152,7 +162,8 @@ switch block(iBlock).trialSet(iTrial).blockType
 
 
         [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(...
-            taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius, vbl);
+            taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius,...
+            pointerMarginRadius, xCenter, yCenter, vbl, timer);
 
         if flags.isOnLine && flags.eyeFixed
             block(iBlock).trialSet(iTrial).saccadeOn     = tFixBreak - timer;

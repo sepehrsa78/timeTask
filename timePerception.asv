@@ -152,12 +152,12 @@ else
 end
 
 siShort = nan(size(nBlock, numTrls));
-siInter = nan(size(nBlock, numTrls));
-siLong  = nan(size(nBlock, numTrls));
-diShort = nan(size(nBlock, numTrls));
-diInter = nan(size(nBlock, numTrls));
-diLong  = nan(size(nBlock, numTrls));
-delay   = nan(size(nBlock, numTrls));
+siInter = 
+siLong  = [];
+diShort
+diInter
+diLong
+delay
 
 for iBlock = 1:nBlock
     for iTrial = 1:numTrls
