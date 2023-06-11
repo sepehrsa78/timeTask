@@ -9,13 +9,13 @@ taskSettings.durations.siInter           = siInter;
 taskSettings.durations.siLong            = siLong;
 taskSettings.durations.ITI               = 1 - .0167;
 taskSettings.durations.tFixed            = .1;
-taskSettings.durations.feedB             = 0.033;
+taskSettings.durations.feedB             = 0.3;
 taskSettings.durations.saccAcc           = .1;
 
 taskSettings.diams.fix                   = .5;
 taskSettings.diams.set                   = 1.5;
 taskSettings.diams.target                = 1.5;
-taskSettings.diams.lineWidth             = 10;
+taskSettings.diams.lineWidth             = 15;
 taskSettings.diams.fixWidth              = 5;
 
 taskSettings.rads.timeMargin              = 2;

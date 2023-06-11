@@ -1,5 +1,5 @@
-function [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(taskSettings, window, flags, frameSpecs,...
-    rects, spaceMarginRadius, vbl)
+function [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(taskSettings, flags,...
+    rects, spaceMarginRadius)
 
 while ~flags.break
     while flags.inFix
@@ -15,11 +15,7 @@ while ~flags.break
         end
     end
 
-    for numFrames = 1:round(taskSettings.durations.saccAcc / frameSpecs.ifi)
-        Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
-        Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
-        vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-    end
+    WaitSecs(taskSettings.durations.saccAcc);
 
     %     tmp    = Eyelink('NewestFloatSample');
     [xSacc, ySacc] = GetMouse();
