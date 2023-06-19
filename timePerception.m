@@ -332,7 +332,6 @@ vbl = Screen('Flip', window);
 for numFrames = 1:round(taskSettings.durations.ITI / frameSpecs.ifi) - 2
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
 end
-Priority(0);
 
 end
 
@@ -343,6 +342,7 @@ Prompt_Start = 'Task Finished';
 DrawFormattedText(window, Prompt_Start, 'center', 'center', BlackIndex(screenNumber) / 2);
 Screen('Flip', window);
 sca;
+Priority(0);
 % WaitSecs(0.100)
 % Eyelink('StopRecording')
 %% Data Storage
