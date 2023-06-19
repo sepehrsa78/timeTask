@@ -9,7 +9,7 @@ taskSettings.durations.siInter           = siInter;
 taskSettings.durations.siLong            = siLong;
 taskSettings.durations.ITI               = 1 - .0167;
 taskSettings.durations.tFixed            = .1;
-taskSettings.durations.feedB             = 0.033;
+taskSettings.durations.feedB             = 0.3;
 taskSettings.durations.saccAcc           = .1;
 
 taskSettings.diams.fix                   = .5;

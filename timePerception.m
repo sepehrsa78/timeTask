@@ -1,7 +1,11 @@
-%% Refreshing the Workspace
+ %% Refreshing the Workspace
 sca
 close all
-clearvars -except run answer nBlock block sData
+if exist('answer', 'var') && answer{6, 1} ~= '1'
+    clearvars -except run answer nBlock block sData taskSettings
+else
+    clear
+end
 clear global
 clc
 ListenChar
@@ -18,8 +22,6 @@ global params
 
 params.isFirst      = true;
 params.isAllowed    = false;
-params.isBlockEnd   = false;
-params.isSave       = false;
 %% Subject Information 
 
 if ~exist('run', 'var')
@@ -33,7 +35,7 @@ if ~exist('run', 'var')
     end
 end
 
-if exist('isFirstSession', 'var') && isFirstSession
+if (exist('isFirstSession', 'var') && isFirstSession) || (exist('answer', 'var') && answer{6, 1} == '1')
     prompt      = {'Subject Name:', 'Subject Number:', 'Age:', 'Gender:', 'Hand:', 'Demo:', 'Time First:', 'Light Left:'};
     dlgtitle    = 'Subject Information';
     dims        = [1 35];
@@ -41,28 +43,48 @@ if exist('isFirstSession', 'var') && isFirstSession
     run         = 1;
     ListenChar(2)
 elseif exist('isFirstSession', 'var') && ~isFirstSession && ~exist('run', 'var')
-    dataDir     = ls('./results/');
-    dataDir     = dataDir(3:end, :);
-    idx         = listdlg('ListString', dataDir);
-    subjectName = dataDir(idx, :);
+    dataDir     = dir('./results/');
+    for iFolder = 3:length(dataDir)
+        names{iFolder} = dataDir(iFolder).name;
+    end
+    names       = char(names(3:end));
+    idx         = listdlg('ListString', names);
+    subjectName = names(idx, :);
+    
     load(fullfile('results', deblank(subjectName), strcat(subjectName, '_conditionMap.mat')))
     if exist(fullfile('results', deblank(subjectName), strcat(subjectName, '_data.mat')), 'file')
         load(fullfile('results', deblank(subjectName), strcat(subjectName, '_data.mat')))
+        taskSettings = sData.taskSettings;
+        answer       = sData.sInfo;
     end
 
-    prompt      = {'Block Number:'};
-    dlgtitle    = 'Run Information';
-    dims        = [1 35];
-    bAns        = inputdlg(prompt, dlgtitle, dims);
-    run         = str2double(bAns{1});
+    prompt                   = {'Block Number:'};
+    dlgtitle                 = 'Run Information';
+    dims                     = [1 35];
+    bAns                     = inputdlg(prompt, dlgtitle, dims);
+    run                      = str2double(bAns{1});
+    if exist(fullfile('results', deblank(subjectName), strcat(subjectName, '_data.mat')), 'file')
+        fieldsToEmpty            = {...
+            'fixOn', 'fixOff', 'lineOn', 'lineOff', 'setOn',...
+            'setOff', 'tarOn', 'saccadeOn', 'saccadeInRect',...
+            'feedBackOn', 'feedBackOff', 'prodDist', 'RT'};
+        sData.Blocks(run).Trials = emptyStruct(sData.Blocks(run).Trials, fieldsToEmpty);
+        block(run).trialSet      = emptyStruct(block(run).trialSet, fieldsToEmpty);
+    end
     ListenChar(2)
 elseif exist('run', 'var')
-    prompt      = {'Block Number:'};
-    dlgtitle    = 'Run Information';
-    dims        = [1 35];
-    defInput    = run + 1;
-    bAns        = inputdlg(prompt, dlgtitle, dims, {num2str(defInput)});
-    run         = str2double(bAns{1});
+    prompt                   = {'Block Number:'};
+    dlgtitle                 = 'Run Information';
+    dims                     = [1 35];
+    defInput                 = run + 1;
+    bAns                     = inputdlg(prompt, dlgtitle, dims, {num2str(defInput)});
+    fieldsToEmpty            = {...
+        'fixOn', 'fixOff', 'lineOn', 'lineOff', 'setOn',...
+        'setOff', 'tarOn', 'saccadeOn', 'saccadeInRect',...
+        'feedBackOn', 'feedBackOff', 'prodDist', 'RT'};
+    run                      = str2double(bAns{1});
+    sData.Blocks(run).Trials = emptyStruct(sData.Blocks(run).Trials, fieldsToEmpty);
+    block(run).trialSet      = emptyStruct(block(run).trialSet, fieldsToEmpty);
     ListenChar(2)
 end
 %% Initialize Eyetracker
@@ -79,10 +101,10 @@ if ~exist(fullfile(path, 'results', answer{1, 1}), 'dir')
     mkdir(fullfile(path, 'results', answer{1, 1}))
 end
 
-% save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_B%d_eyeD.edf', answer{2, 1}, run)));
-% edfFile = fullfile(path, 'results', answer{1, 1}, sprintf('%sـB%d_eyeD', answer{2, 1}, run));
-% 
-% eyeInit(edfFile);
+save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_B%d_eD.edf', answer{2, 1}, run)));
+edfFile = fullfile(path, 'results', answer{1, 1}, sprintf('%s_B%d_eD', answer{2, 1}, run));
+
+eyeInit(edfFile);
 %% Psychtoolbox Setup
 
 PsychDefaultSetup(2);
@@ -131,23 +153,19 @@ topPriorityLevel    = MaxPriority(window);
 SetMouse(xCenter, yCenter);
 %% Eye Calibration
 
-% el = eyeCalib(window, width, height, backColor);
+el = eyeCalib(window, width, height, backColor);
 %% Task Parameters and Constants
 
 timeCondsNum = 3;
 distCondsNum = 3;
 blockPmodal  = 4;
-trlReps      = 6;
+nBlock       = 8;
 
 if answer{6, 1} == '1'
-    nBlock       = 2;
-    timeCondsNum = 3;
-    distCondsNum = 3;
-    blockPmodal  = 2;
-    trlReps      = 1;
-    numTrls      = timeCondsNum * distCondsNum * trlReps;
+    trlReps  = 1;
+    numTrls  = timeCondsNum * distCondsNum * trlReps;
 else
-    nBlock   = 8;
+    trlReps  = 6;
     numTrls  = timeCondsNum * distCondsNum * trlReps;
 end
 
@@ -173,11 +191,13 @@ end
 
 % Task Settings
 
-taskSettings = settingsTask(...
-    delay, siShort, siInter,...
-    siLong, diShort, diInter,...
-    diLong, monitorDistance, monitorWidth,...
-    screenWidth, xCenter, yCenter, windowRect);
+if run == 1 && ~exist('sData', 'var')
+    taskSettings = settingsTask(...
+        delay, siShort, siInter,...
+        siLong, diShort, diInter,...
+        diLong, monitorDistance, monitorWidth,...
+        screenWidth, xCenter, yCenter, windowRect);
+end
 %% Creating the Condition Map
 
 blockTypes = [repmat({'time'}, [1 blockPmodal]) repmat({'space'}, [1 blockPmodal])];
@@ -201,7 +221,7 @@ lineLocs(find(strcmp(blockTypes, 'space') & strcmp(flashLocs, 'left'), blockPmod
 
 timeSpaceIntervals = cellstr(repmat(permn(interTypes, 2), [trlReps 1]));
 
-if run == 1
+if run == 1 && ~exist('sData', 'var')
     for iBlock = 1:nBlock
         switch lineLocs{iBlock}
             case 'upright'
@@ -262,15 +282,19 @@ if run == 1
             end
         end
         block(iBlock).trialSet = block(iBlock).trialSet(randperm(numTrls));
+        if answer{6, 1} ~= '1'
+            sData.Blocks(iBlock).Trials = block(iBlock).trialSet;
+        end
     end
-    save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_conditionMap.mat', answer{1, 1})));
+    if answer{6, 1} ~= '1'
+        save(fullfile(path, 'results', answer{1, 1}, sprintf('%s_conditionMap.mat', answer{1, 1})), 'block', 'answer');
+    end
 end
 %% Task Body
 
-% Eyelink('SetOfflineMode');
-% Eyelink('StartRecording');
-% WaitSecs(.010)
-
+Eyelink('SetOfflineMode');
+Eyelink('StartRecording');
+WaitSecs(.010)
 timer = GetSecs();
 
 iTrial            = 0;
@@ -299,16 +323,16 @@ while iTrial <= numTrls
         break
     end
 
-%     Eyelink('Message', 'TRIALID %d', iTrial);
-%     Eyelink('Command', 'record_status_message "TRIAL %d/%d"', iTrial, numTrls);
+    Eyelink('Message', 'TRIALID %d', iTrial);
+    Eyelink('Command', 'record_status_message "TRIAL %d/%d"', iTrial, numTrls);
 
     Priority(topPriorityLevel);
     [block] = expDirs(taskSettings, frameSpecs, window, xCenter, yCenter, block, run, iTrial, timer);
 
-%     Eyelink('Message', 'BLANK_SCREEN');
-%     Eyelink('Message', '!V CLEAR %d %d %d', 80, 80, 80);
-%     Eyelink('Message', '!V TRIAL_VAR iteration %d', iTrial); % Trial iteration
-%     Eyelink('Message', 'TRIAL_RESULT 0');
+    Eyelink('Message', 'BLANK_SCREEN');
+    Eyelink('Message', '!V CLEAR %d %d %d', 80, 80, 80);
+    Eyelink('Message', '!V TRIAL_VAR iteration %d', iTrial); % Trial iteration
+    Eyelink('Message', 'TRIAL_RESULT 0');
 
 vbl = Screen('Flip', window);
 for numFrames = 1:round(taskSettings.durations.ITI / frameSpecs.ifi) - 2
@@ -324,19 +348,13 @@ sData.Blocks(run).Trials = block(run).trialSet;
 Prompt_Start = 'Task Finished';
 DrawFormattedText(window, Prompt_Start, 'center', 'center', BlackIndex(screenNumber) / 2);
 Screen('Flip', window);
-
-% WaitSecs(0.100)
-% Eyelink('StopRecording')
+WaitSecs(0.100)
+Eyelink('StopRecording')
 %% Data Storage
 
-if run == 1
+if run == 1 && answer{6, 1} ~= '1'
     sData.sInfo          = answer;
-    sData.Durations      = taskSettings.durations;
-    sData.Dists          = taskSettings.dists;
-    sData.Diams          = taskSettings.diams;
-    sData.Rads           = taskSettings.rads;
-    sData.Lines          = taskSettings.lines;
-    sData.Colors         = taskSettings.colors;
+    sData.taskSettings   = taskSettings;
     sData.blockType      = blockTypes;
 end
 %% Save Data
@@ -344,31 +362,29 @@ end
 if ~exist(fullfile(path, 'results', answer{1, 1}), 'dir')
     mkdir(fullfile(path, 'results', answer{1, 1}))
 end
-if answer{6, 1} == '1'
-    save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_demo_data.mat']))
-else
-    blockData = Blocks(run).Trials;
+if answer{6, 1} ~= '1'
+    blockData = block(run).trialSet;
     save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, sprintf('_B%d_data.mat', run)]), 'blockData')
     save(fullfile(path, 'results', answer{1, 1}, [answer{1, 1}, '_data.mat']), 'sData')
 end
 %% Close Eyetracker
 
-% % CLOSE EDF FILE. TRANSFER EDF COPY TO DISPLAY PC. CLOSE EYELINK CONNECTION. FINISH UP
-% 
-% % Put tracker in idle/offline mode before closing file.
-% Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
-% Eyelink('Command', 'clear_screen 0'); % Clear Host PC backdrop graphics at the end of the experiment
-% WaitSecs(0.5); % Allow some time before closing and transferring file
-% Eyelink('CloseFile'); % Close EDF file on Host PC
-% 
-% cd(fullfile(path, 'results', answer{1, 1}))
-% 
-% % Transfer a copy of the EDF file to Display PC
-% transferFile(edfFile, 0, v window, backColor, windowRect(4)); % See transferFile function below
-% 
-% % Close all the windows and screens
-% sca;
-% Eyelink('Shutdown');
+% CLOSE EDF FILE. TRANSFER EDF COPY TO DISPLAY PC. CLOSE EYELINK CONNECTION. FINISH UP
+
+% Put tracker in idle/offline mode before closing file.
+Eyelink('SetOfflineMode'); % Put tracker in idle/offline mode
+Eyelink('Command', 'clear_screen 0'); % Clear Host PC backdrop graphics at the end of the experiment
+WaitSecs(0.5); % Allow some time before closing and transferring file
+Eyelink('CloseFile'); % Close EDF file on Host PC
+
+cd(fullfile(path, 'results', answer{1, 1}))
+
+% Transfer a copy of the EDF file to Display PC
+transferFile(edfFile, 0, window, backColor, windowRect(4)); % See transferFile function below
+
+% Close all the windows and screens
+sca;
+Eyelink('Shutdown');
 
 % Make the cursor visible
 ShowCursor;

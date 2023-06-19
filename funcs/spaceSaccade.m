@@ -1,30 +1,27 @@
-function [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = ...
-    spaceSaccade(taskSettings, window, flags, frameSpecs, rects, spaceMarginRadius, vbl)
+function [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(...
+    taskSettings, flags, rects, spaceMarginRadius)
 
 while ~flags.break
     while flags.inFix
-        tmp = Eyelink('NewestFloatSample');
-        xFix = tmp.gx(1);
-        yFix = tmp.gy(1);
-        if ~IsInRect(xFix, yFix, rects.fixMarginRect) && IsInRect(xFix, yFix, taskSettings.windowRect)
-            tFixBreak   = GetSecs();
+        tmp         = Eyelink('NewestFloatSample');
+        tFixBreak   = GetSecs();
+        xFix        = tmp.gx(1);
+        yFix        = tmp.gy(1);
+        flags.inFix = IsInRect(xFix, yFix, rects.fixMarginRect);
+        if ~flags.inFix
             Eyelink('Message', 'Saccade On');
-            flags.inFix = false;
             break
         end
     end
-
-    for numFrames = 1:round(taskSettings.durations.saccAcc / frameSpecs.ifi) - 1
-        Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
-        Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
-        vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-    end
-
-    tmp    = Eyelink('NewestFloatSample');
-    Eyelink('Message', 'Saccade In Rect');
+    
+    WaitSecs(taskSettings.durations.saccAcc);
+    
+    tmp    = Eyelink('NewestFloatSample');  
     tSampl = GetSecs();
+    Eyelink('Message', 'Saccade On Line');
     xSacc  = tmp.gx(1);
     ySacc  = tmp.gy(1);
+    
     [flags.isOnLine, dist2cent, dist2line] = marginalDistance(taskSettings, [xSacc, ySacc], rects);
     if flags.isOnLine
         rects.spaceMarginRect = [...
