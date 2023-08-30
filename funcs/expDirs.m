@@ -59,8 +59,6 @@ for numFrames = 1:round(taskSettings.durations.fixation / frameSpecs.ifi)
         block(iBlock).trialSet(iTrial).fixOn = vbl - timer;
     end
 end
-imageArray = Screen('GetImage', window, [], [], 1, []);
-imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\fix.png');
 
 for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
     Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
@@ -72,16 +70,12 @@ for numFrames = 1:round(block(iBlock).trialSet(iTrial).delay / frameSpecs.ifi)
         block(iBlock).trialSet(iTrial).fixOff = vbl - timer;
     end
 end
-imageArray = Screen('GetImage', window, [], [], 1, []);
-imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\line.png');
 
 for numFrames = 1:round(1)
     Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
     Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
     Screen('FillOval', window, taskSettings.colors.circles, rects.setRect);
     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-    imageArray = Screen('GetImage', window, [], [], 1, []);
-    imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\flash.png');
     if isempty(block(iBlock).trialSet(iTrial).setOn)
         %         Eyelink('Message', 'Set On');
         block(iBlock).trialSet(iTrial).lineOff = vbl - timer;
@@ -97,8 +91,6 @@ for numFrames = 1:round(block(iBlock).trialSet(iTrial).timeInterval / frameSpecs
         block(iBlock).trialSet(iTrial).setOff = vbl - timer;
     end
 end
-imageArray = Screen('GetImage', window, [], [], 1, []);
-imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\blank.png');
 
 switch block(iBlock).trialSet(iTrial).blockType
     case 'time'
@@ -107,8 +99,6 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.fix);
         Screen('FillOval', window, taskSettings.colors.circles, rects.targetRect);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-        imageArray = Screen('GetImage', window, [], [], 1, []);
-        imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\target.png');
         %         Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
 
@@ -136,8 +126,6 @@ switch block(iBlock).trialSet(iTrial).blockType
                     vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
                 end
             end
-            imageArray = Screen('GetImage', window, [], [], 1, []);
-            imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\success.png');
             vbl = Screen('Flip', window);
             %             Eyelink('Message', 'Success Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
@@ -151,8 +139,6 @@ switch block(iBlock).trialSet(iTrial).blockType
                     %                     Eyelink('Message', 'Abort Feedback On');
                 end
             end
-            imageArray = Screen('GetImage', window, [], [], 1, []);
-            imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\fail.png');
             vbl = Screen('Flip', window);
             %             Eyelink('Message', 'Abort Feedback Off');
             block(iBlock).trialSet(iTrial).feedBackOff = vbl - timer;
@@ -162,8 +148,6 @@ switch block(iBlock).trialSet(iTrial).blockType
         Screen('DrawLines', window, rects.lineOS, taskSettings.diams.lineWidth, taskSettings.colors.line);
         Screen('DrawLines', window, rects.fixLines, taskSettings.diams.fixWidth, taskSettings.colors.go);
         vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-        imageArray = Screen('GetImage', window, [], [], 1, []);
-        imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\tars.png');
         %         Eyelink('Message', 'Target On');
         block(iBlock).trialSet(iTrial).tarOn = vbl - timer;
         greenOn = vbl;
@@ -172,7 +156,6 @@ switch block(iBlock).trialSet(iTrial).blockType
         flags.eyeFixed = false;
         flags.inFix    = true;
         flags.break    = false;
-
 
         [flags, tFixBreak, tSampl, xSacc, ySacc, dist2cent, dist2line] = spaceSaccade(...
             taskSettings, flags, rects, spaceMarginRadius);
@@ -193,8 +176,6 @@ switch block(iBlock).trialSet(iTrial).blockType
                 Screen('FillOval', window, taskSettings.colors.go, rects.spaceFeedRect);
                 if numFrames == 1
                     vbl = Screen('Flip', window);
-                    imageArray = Screen('GetImage', window, [], [], 1, []);
-                    imwrite(imageArray, 'F:\#2 MS Projects\Ongoing\timePerception\timeTask\schem\success.png');
                     %                     Eyelink('Message', 'Success Feedback On');
                     block(iBlock).trialSet(iTrial).feedBackOn = vbl - timer;
                 else

@@ -328,10 +328,7 @@ while iTrial <= numTrls
 %     Eyelink('Message', '!V TRIAL_VAR iteration %d', iTrial); % Trial iteration
 %     Eyelink('Message', 'TRIAL_RESULT 0');
 
-vbl = Screen('Flip', window);
-for numFrames = 1:round(taskSettings.durations.ITI / frameSpecs.ifi) - 2
-    vbl = Screen('Flip', window, vbl + (frameSpecs.waitframes - 0.5) * frameSpecs.ifi);
-end
+WaitSecs(taskSettings.durations.ITI - frameSpecs.ifi); 
 
 end
 
