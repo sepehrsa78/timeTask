@@ -36,9 +36,20 @@ end
 %% Store trial data
 sessionState.trialData{sessionState.currentTrial} = trialCtx.trialData;
 
-%% Store dot movie (positions + colors for all frames shown)
-sessionState.dotMovies{sessionState.currentTrial}.dotPos      = trialCtx.dotPos(:, :, 1:trialCtx.trialData.framesShown);
-sessionState.dotMovies{sessionState.currentTrial}.framesShown = trialCtx.trialData.framesShown;
+%% Store dots_struct (matching rig_files format)
+dots_struct.aperture        = cfg.dots.aperture;
+dots_struct.direction       = trialCtx.trialParams.motionDir;
+dots_struct.coherence       = trialCtx.trialParams.motionCoh;
+dots_struct.speed           = cfg.dots.speed;
+dots_struct.density         = cfg.dots.density;
+dots_struct.dot_size        = cfg.dots.dotSize;
+dots_struct.col_dir         = trialCtx.trialParams.colorDir;
+dots_struct.col_coh         = trialCtx.trialParams.colorCoh;
+dots_struct.interval        = cfg.dots.interval;
+dots_struct.show_color1_first = trialCtx.drawColor1First;
+dots_struct.shown_frames    = trialCtx.trialData.framesShown;
+dots_struct.dot_pos         = trialCtx.dotPos(:, :, 1:trialCtx.trialData.framesShown);
+sessionState.save_struct{sessionState.currentTrial}.dots_struct = dots_struct;
 
 %% Advance trial counter
 sessionState.currentTrial = sessionState.currentTrial + 1;

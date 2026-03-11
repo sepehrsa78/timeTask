@@ -1,16 +1,16 @@
 function saveProgress(sessionState, subjectDir)
-% saveProgress  Save current session state to disk (without dot movies).
+% saveProgress  Save current session state to disk (without dot info).
 %
 %   saveProgress(sessionState, subjectDir)
 %
-%   Saves the sessionState struct (excluding dotMovies, which are large
+%   Saves the sessionState struct (excluding save_struct, which is large
 %   and saved separately by saveDotMovies) so the task can be resumed
 %   from the exact trial where it left off.
 
-% Exclude dotMovies from per-trial auto-save to keep files small
+% Exclude save_struct from per-trial auto-save to keep files small
 stateToSave = sessionState;
-if isfield(stateToSave, 'dotMovies')
-    stateToSave = rmfield(stateToSave, 'dotMovies');
+if isfield(stateToSave, 'save_struct')
+    stateToSave = rmfield(stateToSave, 'save_struct');
 end
 
 save(fullfile(subjectDir, 'sessionState.mat'), 'stateToSave');
