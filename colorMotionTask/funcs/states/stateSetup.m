@@ -94,6 +94,23 @@ trialCtx.trialData = struct(...
 trialCtx.escapePressed = false;
 trialCtx.vbl = [];
 
+%% Console output
+if trial.motionDir == 90
+    motionStr = 'UP';
+else
+    motionStr = 'DOWN';
+end
+if trial.colorDir == 1
+    colorStr = 'GREEN';
+else
+    colorStr = 'RED';
+end
+fprintf('Trial %d/%d | Motion: %s (%.3f) [%+.3f] | Color: %s (%.3f) [%+.3f] | Correct: %s\n', ...
+    sessionState.currentTrial, length(sessionState.trialList), ...
+    motionStr, trial.motionCoh, trial.signedMotionCoh, ...
+    colorStr, trial.colorCoh, trial.signedColorCoh, ...
+    upper(trial.correctTarget));
+
 %% EyeLink trial start messages
 Eyelink('Message', 'TRIALID %d', sessionState.currentTrial);
 Eyelink('Command', 'record_status_message "TRIAL %d/%d"', ...
