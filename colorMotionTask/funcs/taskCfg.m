@@ -32,10 +32,10 @@ cfg.coherences            = [0, 0.032, 0.064, 0.128, 0.256, 0.512];
 
 %% Experimental Design
 cfg.nReps                 = 5;               % repetitions per unique condition
-cfg.trialsPerBlock        = 0;               % 0 = all trials in one block
 
 %% Timing (seconds)
-cfg.timing.fixation       = 0.5;             % fixation duration before stimulus
+cfg.timing.fixHoldToStart = 0.1;             % required gaze hold in fixation window before trial starts
+cfg.timing.fixation       = 0.5;             % fixation duration before stimulus (after gaze acquired)
 cfg.timing.maxRT          = 5.0;             % maximum response time
 cfg.timing.fixedDuration  = 0;               % 0 = RT mode; >0 = fixed viewing duration
 cfg.timing.feedbackDur    = 0.3;             % feedback display duration
