@@ -32,6 +32,7 @@ cfg.coherences            = [0, 0.032, 0.064, 0.128, 0.256, 0.512];
 
 %% Experimental Design
 cfg.nReps                 = 5;               % repetitions per unique condition
+cfg.dotMovieBatchSize     = 100;             % save dot movies to disk every N trials
 
 %% Timing (seconds)
 cfg.timing.fixHoldToStart = 0.1;             % required gaze hold in fixation window before trial starts

@@ -68,6 +68,9 @@ for numFrames = 1:maxDotFrames
     end
 end
 
+% Record actual frames shown (trial may end early on saccade)
+trialCtx.trialData.framesShown = frameIdx;
+
 %% Handle saccade landing or timeout
 if saccDetected
     % Wait for saccade to land

@@ -169,9 +169,11 @@ while true
             [state, trialCtx, sessionState] = stateITI(cfg, trialCtx, sessionState, window, frameSpecs);
             Priority(0);
             saveProgress(sessionState, subjectDir);
+            saveDotMovies(sessionState, subjectDir, cfg.dotMovieBatchSize);
 
         case 'PAUSE'
             Priority(0);
+            saveDotMovies(sessionState, subjectDir, 0);  % force save before pause
             [state, sessionState] = statePause(cfg, sessionState, window, el, width, height, backColor, subjectDir);
 
         case 'SET_COMPLETE'
@@ -185,6 +187,7 @@ while true
 end
 
 %% Final Save
+saveDotMovies(sessionState, subjectDir, 0);  % force save remaining dot movies
 saveProgress(sessionState, subjectDir);
 
 %% Task Finished Prompt

@@ -36,6 +36,10 @@ end
 %% Store trial data
 sessionState.trialData{sessionState.currentTrial} = trialCtx.trialData;
 
+%% Store dot movie (positions + colors for all frames shown)
+sessionState.dotMovies{sessionState.currentTrial}.dotPos      = trialCtx.dotPos(:, :, 1:trialCtx.trialData.framesShown);
+sessionState.dotMovies{sessionState.currentTrial}.framesShown = trialCtx.trialData.framesShown;
+
 %% Advance trial counter
 sessionState.currentTrial = sessionState.currentTrial + 1;
 
