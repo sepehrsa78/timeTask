@@ -18,7 +18,7 @@ clear global
 clc
 ListenChar
 
-addpath('funcs')
+addpath(genpath('funcs'))
 basePath = pwd;
 rng('shuffle');
 
